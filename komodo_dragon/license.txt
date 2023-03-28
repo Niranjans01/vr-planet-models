@@ -1,0 +1,11 @@
+Model Information:
+* title:	Komodo Dragon
+* source:	https://sketchfab.com/3d-models/komodo-dragon-0b8679521991420a8b48a6e63018f52c
+* author:	nathaniel (https://sketchfab.com/Xfdfgd)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Komodo Dragon" (https://sketchfab.com/3d-models/komodo-dragon-0b8679521991420a8b48a6e63018f52c) by nathaniel (https://sketchfab.com/Xfdfgd) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

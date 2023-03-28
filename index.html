@@ -1,0 +1,60 @@
+<html>
+
+<head>
+    <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
+    <!--     <script src="play-all-model-animations.js"></script> -->
+    <script>
+        AFRAME.registerComponent('modify-materials', {
+            init: function () {
+                // Wait for model to load.
+                this.el.addEventListener('model-loaded', () => {
+                    // Grab the mesh / scene.
+                    const obj = this.el.getObject3D('mesh');
+                    // Go over the submeshes and modify materials we want.
+                    obj.traverse(node => {
+                        if (node.name.indexOf('ship') !== -1) {
+                            node.material.color.set('red');
+                        }
+                    });
+                });
+            }
+        });
+
+        function getClickPosition(clickedEntity, event) {
+            var intersection = event.detail.intersection;
+            console.log(intersection.point.x, intersection.point.y, intersection.point.z);
+            console.log( clickedEntity.getAttribute('rotation'));
+            var camera = document.querySelector('a-entity[camera]');
+            camera.setAttribute('position', {
+                x: intersection.point.x,
+                y: intersection.point.y,
+                z: intersection.point.z
+            });
+            camera.setAttribute('rotation', {
+                x: 0,
+                y: 2,
+                z: -2
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <a-scene>
+        <a-assets>
+            <a-asset-item id="cityModel" src="solar_system/scene.gltf">
+            </a-asset-item>
+        </a-assets>
+        <a-sky radius="10"
+            material="side: back; src: https://images.unsplash.com/photo-1516410290616-fb59b7994a51?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTZ8fHNvbGFyJTIwc3lzdGVtJTIwcGxhbmV0c3xlbnwwfHwwfHw%3D&w=1000&q=80"></a-sky>
+
+        <a-entity gltf-model="#cityModel" modify-materials position="0 1 -2" class="clickable"
+            onclick="getClickPosition(this, event)"></a-entity>
+        <a-entity position="0 2 0" >
+            <a-camera camera look-controls raycaster="objects: .clickable;"></a-camera>
+            <a-cursor fuse="true" fuse-timeout="1500" color="#FFF"></a-cursor>
+        </a-entity>
+    </a-scene>
+</body>
+
+</html>
