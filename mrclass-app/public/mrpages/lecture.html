@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Lecture class</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+</head>
+
+<body>
+    <a-scene id="test" vr-mode-ui="enabled: false"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;">
+        <a-camera gps-camera rotation-reader> </a-camera>
+    </a-scene>
+</body>
+<script>
+    const socket = new WebSocket('ws://localhost:8080');
+    let posting = -2.695180;
+    function createNewElement(image, i) {
+        posting = posting - (0.007 * i);
+        // Create a new AR entity
+        var newAREntity = document.createElement("a-entity");
+        newAREntity.setAttribute("name", `ar-users`);
+        newAREntity.setAttribute("gltf-model", `url(/images/${image})`);
+        newAREntity.setAttribute("scale", "100 100 100");
+        newAREntity.setAttribute("position", "-0.23, 0.36, 0.02");
+        newAREntity.setAttribute("gps-entity-place", `latitude: 53.758110; longitude: ${posting};`);
+        // newAREntity.setAttribute("animation", "property: rotation; to: 0 360 0; loop: true; dur: 10000");
+
+        // Add the new AR entity to the container element
+        var newAREntityContainer = document.getElementById("test");
+        newAREntityContainer.appendChild(newAREntity);
+    }
+    let totalParticipants = []
+    socket.onmessage = (event) => {
+        const values = JSON.parse(event.data);
+        let nodesInEntity = document.getElementsByName("ar-users");
+        if (nodesInEntity.length > 0) {
+            for (let i = 0; i < nodesInEntity.length; i++) {
+                nodesInEntity[i].parentNode.removeChild(nodesInEntity[i]);
+            }
+        }
+
+        if (values?.length !== totalParticipants.length) {
+            totalParticipants = values;
+            for (let i = 0; i < values.length; i++) {
+                createNewElement(values[i].profileModelName, i);
+            }
+        }
+    };
+</script>
+
+</html>

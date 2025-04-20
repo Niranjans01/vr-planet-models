@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Classes Dashboard</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+</head>
+
+<body>
+  <a-scene>
+    <a-assets>
+      <!-- <a-asset-item id="cursor" src="/mrassets/hand.glb"></a-asset-item> -->
+      <a-asset-item id="model" src="/images/niranjan.glb"></a-asset-item>
+    </a-assets>
+
+    <a-entity id="camera" position="0 1.6 5">
+      <a-camera look-controls>
+        <a-cursor fuse="true" fuse-timeout="500" material="src: #cursor"
+          geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02" position="0 0 -2"
+          raycaster="objects: .clickable">
+        </a-cursor>
+      </a-camera>
+    </a-entity>
+
+
+
+    <a-text id="detail" value="" color="black" position="-3.5 3.2 -1" align="left" class="clickable">
+    </a-text>
+
+    <a-cylinder id="cylinder-button" data-color="actionBtn" class="clickable" radius="1" height="1" color="#326AFB"
+      value="hello" scale="0 0 0"></a-cylinder>
+
+    <!-- Text on Cylinder Button -->
+    <a-text value="Join" color="white" align="right" position="2.6 3 0" scale="1 1 1"></a-text>
+
+
+
+
+    <a-text id="text" value="Immersive Learning Experience" color="black" align="center" scale="2.2 2.2 2.2"
+      position="0 6.5 -1" scale="0.5 0.5 0.5"></a-text>
+
+
+    <a-plane id="dashboard" position="0 5 -2" width="9" height="6" color="white">
+      <a-entity class="button clickable" data-color="red" position="-3 0 0" material="color: #326AFB"
+        geometry="primitive: box; width: 2; height: 1.5">
+      </a-entity>
+      <a-text value="Planetary Motion" color="white" align="center" position="-3 0 0.5" scale="1 1 1"></a-text>
+
+      <a-entity class="button clickable" data-color="green" position="0 0 0" material="color: #326AFB"
+        geometry="primitive: box; width: 2; height: 1.5">
+      </a-entity>
+      <a-text value="Eclipse Occurrence" color="white" align="center" position="0 0 0.5" scale="1 1 1"></a-text>
+
+      <a-entity class="button clickable" data-color="blue" position="3 0 0" material="color: #326AFB"
+        geometry="primitive: box; width: 2; height: 1.5">
+      </a-entity>
+
+      <a-text value="Classroom" color="white" align="center" position="3 0 0.5" scale="1 1 1"></a-text>
+    </a-plane>
+
+    <a-gltf-model src="#model" position="5 -4 -0" scale="5 5 5"></a-gltf-model>
+    <a-sky color="#ECECEC"></a-sky>
+  </a-scene>
+
+  <script>
+    const socket = new WebSocket('ws://localhost:8080');
+    let url = new URL(window.location.href);
+    let params = url.search;
+    let urlParams = new URLSearchParams(params);
+    let loggedUser = urlParams.get('id');
+    console.log(loggedUser,"loggedUser");
+
+    document.querySelectorAll('.clickable').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        const targetColor = e.target.getAttribute('data-color');
+        if (targetColor === "red") {
+          document.getElementById('detail').setAttribute('value',
+            'Planetary Motion is a immersive class where you will get to experience the motion of planets in the solar system');
+          document.getElementById('cylinder-button').setAttribute('position', "2.6 3 -1");
+          document.getElementById('cylinder-button').setAttribute('scale', "1 1 1");
+          document.getElementById('cylinder-button').setAttribute('value', "http://localhost:3000/api/mrfiles?filename=planet-motion.html");
+        }
+        if (targetColor === "green") {
+          document.getElementById('detail').setAttribute('value',
+            'Eclipse Occurrence is a immersive class where you will get to experience the simulation of sun, moon and earth. Where you will get to see the eclipse occurence');
+          document.getElementById('cylinder-button').setAttribute('position', "2.6 3 -1");
+          document.getElementById('cylinder-button').setAttribute('scale', "1 1 1");
+          document.getElementById('cylinder-button').setAttribute('value', "http://localhost:3000/api/mrfiles?filename=eclipse.html");
+        }
+
+        if (targetColor === "blue") {
+          document.getElementById('detail').setAttribute('value',
+            'Classroom is a immersive class where you will get to experience the classroom environment in VR.');
+          document.getElementById('cylinder-button').setAttribute('position', "2.6 3 -1");
+          document.getElementById('cylinder-button').setAttribute('scale', "1 1 1");
+          document.getElementById('cylinder-button').setAttribute('value', "http://localhost:3000/api/mrfiles?filename=lecture.html");
+        }
+
+        const targetButton = e.target.getAttribute('cylinder-button');
+        let link = document.getElementById('cylinder-button').getAttribute('value');
+        if (targetColor === "actionBtn" && link) {
+          socket.send(JSON.stringify(userInfo));
+          window.open(link, '_blank');
+        }
+        setTimeout(() => {
+          document.getElementById('detail').setAttribute('value', "");
+          document.getElementById('cylinder-button').setAttribute('position', "2.6 3 -1");
+          document.getElementById('cylinder-button').setAttribute('scale', "0 0 0");
+          link = "";
+        }, 5000);
+      });
+    });
+
+  </script>
+</body>
+
+</html>

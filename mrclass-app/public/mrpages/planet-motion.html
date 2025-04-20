@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>VR Planets</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script>
+        let variablePlanet = '#earthEntity';
+        AFRAME.registerComponent('orbit', {
+            schema: {
+                radius: { type: 'number', default: 5 },
+                period: { type: 'number', default: 10 }
+            },
+
+            // init: function () {
+            //     this.orbitCenter = new THREE.Vector3();
+            // },
+            init: function () {
+                const sunEntity = document.querySelector('#sunEntity');
+                this.orbitCenter = sunEntity.object3D.position;
+            },
+
+            tick: function (time, timeDelta) {
+                const radius = this.data.radius;
+                const period = this.data.period;
+                const angle = (time / 1000) * (2 * Math.PI) / period;
+
+                const x = this.orbitCenter.x + radius * Math.cos(angle);
+                const y = this.orbitCenter.y;
+                const z = this.orbitCenter.z + radius * Math.sin(angle);
+
+                this.el.setAttribute('position', { x: x, y: y, z: z });
+            }
+
+        });
+
+        AFRAME.registerComponent('follow-target', {
+            schema: {
+                target: { type: 'selector' }
+            },
+
+            init: function () {
+                this.offset = new THREE.Vector3(0, 1.6, 0); // Offset from target's position (y-axis offset for eye level)
+            },
+
+            tick: function () {
+                if (!this.data.target) return;
+
+                const targetPos = this.data.target.getAttribute('position');
+                const newPos = {
+                    x: targetPos.x + this.offset.x,
+                    y: targetPos.y + this.offset.y,
+                    z: targetPos.z + this.offset.z
+                };
+                this.el.setAttribute('position', newPos);
+            }
+        });
+
+
+
+    </script>
+</head>
+
+<body>
+
+    <select id="planetSelector" style="position: absolute; top: 0; left: 0; z-index: 100;">
+        <option value="earthEntity">Earth</option>
+        <option value="marsEntity">Mars</option>
+        <option value="jupiterEntity">Jupiter</option>
+        <option value="sunEntity">Sun</option>
+        <option value="mercuryEntity">Mercury</option>
+        <option value="saturnEntity">Saturn</option>
+        <option value="venusEntity">Venus</option>
+        <option value="uranusEntity">Uranus</option>
+        <option value="neptuneEntity">Neptune</option>
+    </select>
+    <a-scene>
+        <a-assets>
+            <a-asset-item id="earth" src="/mrassets/earth.glb"></a-asset-item>
+            <a-asset-item id="mars" src="/mrassets/mars.glb"></a-asset-item>
+            <a-asset-item id="jupiter" src="/mrassets/jupiter.glb"></a-asset-item>
+            <a-asset-item id="sun" src="/mrassets/sun/scene.gltf"></a-asset-item>
+            <a-asset-item id="mercury" src="/mrassets/mercury.glb"></a-asset-item>
+            <a-asset-item id="saturn" src="/mrassets/saturn.glb"></a-asset-item>
+            <a-asset-item id="venus" src="/mrassets/venus.glb"></a-asset-item>
+            <a-asset-item id="uranus" src="/mrassets/uranus.glb"></a-asset-item>
+            <a-asset-item id="neptune" src="/mrassets/neptune.glb"></a-asset-item>
+
+        </a-assets>
+        <a-sky radius="60"
+            material="side: back; src: https://images.unsplash.com/photo-1516410290616-fb59b7994a51?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTZ8fHNvbGFyJTIwc3lzdGVtJTIwcGxhbmV0c3xlbnwwfHwwfHw%3D&w=1000&q=80"></a-sky>
+        <a-entity camera position="0 1.6 0" look-controls zoom-on-scroll raycaster="objects: .clickable;"
+            follow-target="target: #earthEntity"></a-entity>
+
+
+        <a-entity id="sunEntity" gltf-model="#sun" position="0 0 0" scale="0.1 0.1 0.1"></a-entity>
+        <a-entity id="earthEntity" gltf-model="#earth" rotation="0 0 0" scale="0.005 0.005 0.005"
+            orbit="radius: 5; period: 10"></a-entity>
+        <a-entity id="marsEntity" gltf-model="#mars" rotation="0 0 0" scale="0.006 0.006 0.006"
+            orbit="radius: 8; period: 15"></a-entity>
+        <a-entity id="jupiterEntity" gltf-model="#jupiter" rotation="0 0 0" scale="1 1 1"
+            orbit="radius: 12; period: 25"></a-entity>
+        <a-entity id="mercuryEntity" gltf-model="#mercury" rotation="0 0 0" scale="0.03 0.03 0.03"
+            orbit="radius: 3; period: 6"></a-entity>
+        <a-entity id="saturnEntity" gltf-model="#saturn" rotation="0 0 0" scale="0.01 0.01 0.01"
+            orbit="radius: 15; period: 35"></a-entity>
+        <a-entity id="venusEntity" gltf-model="#venus" rotation="0 0 0" scale="0.2 0.2 0.2"
+            orbit="radius: 4; period: 8"></a-entity>
+        <a-entity id="uranusEntity" gltf-model="#uranus" rotation="0 0 0" scale="0.00001 0.00001 0.00001"
+            orbit="radius: 18; period: 45"></a-entity>
+        <a-entity id="neptuneEntity" gltf-model="#neptune" rotation="0 0 0" scale="0.002 0.002 0.002"
+            orbit="radius: 22; period: 60"></a-entity>
+
+
+
+        <a-entity id="earthLabel" text="value: Earth; width: 4; align: center; color: white;" position="-5 0.6 0"
+            visible="false"></a-entity>
+        <a-entity id="marsLabel" text="value: Mars; width: 4; align: center; color: white;" position="0 0.6 0"
+            visible="false"></a-entity>
+        <a-entity id="jupiterLabel" text="value: Jupiter; width: 4; align: center; color: white;" position="5 0.6 0"
+            visible="false"></a-entity>
+
+        <a-entity id="raycaster" raycaster="objects: .clickable" cursor="fuse: false; rayOrigin: mouse"
+            line="color: white; opacity: 0.75"></a-entity>
+    </a-scene>
+
+    <script>
+        document.querySelector("#earthEntity").addEventListener("mouseenter", () => {
+            document.querySelector("#earthLabel").setAttribute("visible", true);
+        });
+
+        document.querySelector("#earthEntity").addEventListener("mouseleave", () => {
+            document.querySelector("#earthLabel").setAttribute("visible", false);
+        });
+
+        document.querySelector("#marsEntity").addEventListener("mouseenter", () => {
+            document.querySelector("#marsLabel").setAttribute("visible", true);
+        });
+
+        document.querySelector("#marsEntity").addEventListener("mouseleave", () => {
+            document.querySelector("#marsLabel").setAttribute("visible", false);
+        });
+
+        document.querySelector("#jupiterEntity").addEventListener("mouseenter", () => {
+            document.querySelector("#jupiterLabel").setAttribute("visible", true);
+        });
+
+        document.querySelector("#jupiterEntity").addEventListener("mouseleave", () => {
+            document.querySelector("#jupiterLabel").setAttribute("visible", false);
+        });
+    </script>
+    <script>
+        const planetSelector = document.querySelector('#planetSelector');
+        planetSelector.addEventListener('change', (event) => {
+            const selectedPlanetId = event.target.value;
+            const camera = document.querySelector('[camera]');
+            camera.setAttribute('follow-target', 'target', `#${selectedPlanetId}`);
+        });
+    </script>
+</body>
+
+</html>

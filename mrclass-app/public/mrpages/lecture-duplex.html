@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Lecture class</title>
+</head>
+
+<body>
+    <button style="position: absolute; top: 0; z-index: 10;" id="recordButton">Start Recording</button>
+</body>
+<script>
+    const recordButton = document.getElementById('recordButton');
+    let a = 1;
+    recordButton.addEventListener('click', () => {
+        startRecording();
+    });
+
+    async function startRecording() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Your browser does not support the required getUserMedia API.');
+            return;
+        }
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recordButton.disabled = true;
+            setupWebSocket();
+        } catch (error) {
+            alert('Error accessing audio' + error);
+            console.error('Error accessing audio:', error);
+        }
+    }
+
+    function setupWebSocket() {
+        let hostname = window.screen.availWidth > 1000 ? 'localhost' : '172.23.181.95'
+        const ws = new WebSocket(`ws://${hostname}:8080`);
+
+        ws.onopen = () => {
+            console.log('WebSocket connected');
+            broadcastAudio(ws);
+        };
+
+        ws.onmessage = (event) => {
+            const reader = new FileReader();
+            reader.readAsArrayBuffer(event.data);
+            reader.onload = () => {
+                const arrayBuffer = reader.result;
+                const audioData = new Float32Array(arrayBuffer);
+                playAudio(audioData);
+            };
+        };
+
+        ws.onclose = () => {
+            console.log('WebSocket disconnected');
+        };
+    }
+
+    function broadcastAudio(ws) {
+
+        const audioContext = new AudioContext();
+
+        const source = audioContext.createMediaStreamSource(localStream);
+        const processor = audioContext.createScriptProcessor(1024, 1, 1);
+
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+
+        processor.onaudioprocess = (e) => {
+            const audioData = e.inputBuffer.getChannelData(0);
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(audioData.buffer);
+            }
+        };
+    }
+
+    function playAudio(audioData) {
+        const audioContext = new AudioContext();
+        if (audioData.length === 0) {
+            console.error('No audio data to play');
+            return;
+        }
+        const buffer = audioContext.createBuffer(1, audioData.length, audioContext.sampleRate);
+        buffer.copyToChannel(audioData, 0);
+
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+        source.start();
+
+    }
+
+</script>
+
+</html>

@@ -1,0 +1,11 @@
+Model Information:
+* title:	IRONMAN - TONY STARK MARVEL
+* source:	https://sketchfab.com/3d-models/ironman-tony-stark-marvel-3a753e834e7b4b1597667e2fd9c3ed24
+* author:	Felipe.Sanches.Alves (https://sketchfab.com/Felipe.Sanches.Alves)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "IRONMAN - TONY STARK MARVEL" (https://sketchfab.com/3d-models/ironman-tony-stark-marvel-3a753e834e7b4b1597667e2fd9c3ed24) by Felipe.Sanches.Alves (https://sketchfab.com/Felipe.Sanches.Alves) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

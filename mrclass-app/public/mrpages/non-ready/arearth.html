@@ -1,0 +1,66 @@
+<script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+<script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.0.8/aframe/build/aframe-ar.js"></script>
+
+<body style="margin : 0px; overflow: hidden;">
+  <a-scene embedded artoolkit="sourceType: webcam;">
+    <a-marker id="test" preset="hiro">
+      <!-- <a-entity id="ar-content" gltf-model="url(/mrassets/niranjan-gltf.gltf)" scale="1 1 1" position="0 0 -1"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+
+      </a-entity> -->
+    </a-marker>
+
+    <a-entity camera></a-entity>
+  </a-scene>
+  <script>
+    var button = document.querySelector("button");
+    button.addEventListener("click", createNewElement);
+
+    function createNewElement(imageLocation, index) {
+      // Create a new AR entity
+      var newAREntity = document.createElement("a-entity");
+      newAREntity.setAttribute("gltf-model", `url(/images/${imageLocation})`);
+      newAREntity.setAttribute("scale", "1 1 1");
+      newAREntity.setAttribute("position", `0 0 -${index}`);
+      newAREntity.setAttribute("animation", "property: rotation; to: 0 360 0; loop: true; dur: 5000");
+
+      // Add the new AR entity to the container element
+      var newAREntityContainer = document.getElementById("test");
+      newAREntityContainer.appendChild(newAREntity);
+    }
+
+    const socket = new WebSocket('ws://localhost:8080');
+
+    // async function callApiData() {
+    //   // socket.send(JSON.stringify("Hello I am attending"));
+    //   try {
+    //     const response = await fetch('http://localhost:3000/api/attendance');
+    //     if (!response.ok) {
+    //       throw new Error('Network response was not ok');
+    //     }
+
+    //     const data = await response.json();
+    //     let localMembers = [];
+    //     if (localMembers.length !== data.length) {
+    //       for (let value of data) {
+    //         createNewElement(value.imageLocation, value.id);
+    //       }
+    //     }
+    //   } catch (error) {
+    //     console.error('There was a problem with the fetch operation:', error);
+    //   }
+    // }
+    let totalParticipants = []
+    socket.onmessage = (event) => {
+      const values = JSON.parse(event.data);
+      if (values?.length !== totalParticipants.length) {
+        totalParticipants = values;
+        for (let i = 0; i < values.length; i++) {
+          createNewElement(values[i].profileModelName, i);
+        }
+      }
+    };
+
+    // document.onload = callApiData();
+  </script>
+</body>

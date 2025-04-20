@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>GeoAR.js demo</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+</head>
+
+<body>
+    <button style="position: absolute; top: 0; left: 0;z-index: 999;">Create new
+        element</button>
+    <a-scene id="test" vr-mode-ui="enabled: false"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;">
+        <a-entity look-at="[gps-camera]" id="ar-content" gps-entity-place="latitude: 53.758110; longitude: -2.695180;"
+            gltf-model="url(https://cdn.glitch.global/98a28401-e19b-4276-acd2-5986705683d8/rasengan.glb?v=1681128460217)"
+            scale="100 100 100" position="-0.23, 0.36, 0.02"
+            animation="property: rotation; to: 0 360 0; loop: true; dur: 100"></a-entity>
+        <a-camera gps-camera rotation-reader> </a-camera>
+    </a-scene>
+</body>
+<script>
+    var button = document.querySelector("button");
+    button.addEventListener("click", createNewElement);
+    let posting = -2.695180;
+    function createNewElement() {
+        posting = posting - 0.007;
+        alert('Creating '+ posting)
+        // Create a new AR entity
+        var newAREntity = document.createElement("a-entity");
+        newAREntity.setAttribute("gltf-model", "url(https://cdn.glitch.global/98a28401-e19b-4276-acd2-5986705683d8/rasengan.glb?v=1681128460217)");
+        newAREntity.setAttribute("scale", "100 100 100");
+        newAREntity.setAttribute("position", "-0.23, 0.36, 0.02");
+        newAREntity.setAttribute("gps-entity-place", `latitude: 53.758110; longitude: ${posting};`);
+        newAREntity.setAttribute("animation", "property: rotation; to: 0 360 0; loop: true; dur: 10000");
+
+        // Add the new AR entity to the container element
+        var newAREntityContainer = document.getElementById("test");
+        newAREntityContainer.appendChild(newAREntity);
+    }
+</script>
+
+</html>

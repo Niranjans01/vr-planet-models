@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>VR Planets</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script>
+        let variablePlanet = '#earthEntity';
+        AFRAME.registerComponent('orbit', {
+            schema: {
+                radius: { type: 'number', default: 5 },
+                period: { type: 'number', default: 10 },
+                axis: { type: 'string', default: 'y' }
+            },
+
+            init: function () {
+                const sunEntity = document.querySelector('#sunEntity');
+                this.orbitCenter = sunEntity.object3D.position;
+            },
+
+            tick: function (time, timeDelta) {
+                const radius = this.data.radius;
+                const period = this.data.period;
+                const angle = (time / 1000) * (2 * Math.PI) / period;
+
+                const x = this.orbitCenter.x + radius * Math.cos(angle);
+                const y = this.orbitCenter.y;
+                const z = this.orbitCenter.z + radius * Math.sin(angle);
+
+                if (this.data.axis === 'y') {
+                    this.el.setAttribute('position', { x: x, y: y, z: z });
+                } else if (this.data.axis === 'x') {
+                    this.el.setAttribute('position', { x: x, y: y + radius * Math.sin(angle), z: z });
+                } else if (this.data.axis === 'z') {
+                    this.el.setAttribute('position', { x: x, y: y + radius * Math.sin(angle), z: z });
+                }
+
+                const earthEntity = document.querySelector('#earthEntity');
+                const earthPos = earthEntity.getAttribute('position');
+                this.el.object3D.lookAt(earthPos.x, earthPos.y, earthPos.z);
+            }
+        });
+
+
+        AFRAME.registerComponent('follow-target', {
+            schema: {
+                target: { type: 'selector' }
+            },
+
+            init: function () {
+                this.offset = new THREE.Vector3(0, 1.6, 0); // Offset from target's position (y-axis offset for eye level)
+            },
+
+            tick: function () {
+                if (!this.data.target) return;
+
+                const targetPos = this.data.target.getAttribute('position');
+                const newPos = {
+                    x: targetPos.x + this.offset.x,
+                    y: targetPos.y + this.offset.y,
+                    z: targetPos.z + this.offset.z
+                };
+                this.el.setAttribute('position', newPos);
+            }
+        });
+
+        AFRAME.registerComponent('follow-earth', {
+            schema: {
+                target: { type: 'selector' },
+                radius: { type: 'number', default: 5 },
+                period: { type: 'number', default: 10 },
+                axis: { type: 'string', default: 'y' }
+            },
+
+            init: function () {
+                if (!this.data.target) {
+                    console.warn('No target element specified for follow-earth component');
+                    return;
+                }
+
+                this.offset = new THREE.Vector3(0, 0, -this.data.radius);
+                this.targetPos = new THREE.Vector3();
+            },
+
+            tick: function (time, timeDelta) {
+                if (!this.data.target) {
+                    console.warn('Target not found for follow-earth component');
+                    return;
+                }
+
+                const targetPos = this.data.target.getAttribute('position');
+                const angle = (time / 1000) * (2 * Math.PI) / this.data.period;
+                this.offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
+
+                const newPos = new THREE.Vector3().addVectors(targetPos, this.offset);
+                this.el.setAttribute('position', newPos);
+
+                this.el.object3D.lookAt(targetPos);
+            }
+        });
+
+        AFRAME.registerComponent('eorbit', {
+            schema: {
+                radius: { type: 'number', default: 5 },
+                period: { type: 'number', default: 10 },
+                axis: { type: 'string', default: 'y' },
+                center: { type: 'selector' }
+            },
+
+            init: function () {
+                if (!this.data.center) {
+                    console.warn('No center element specified for orbit component');
+                    return;
+                }
+                this.centerPos = new THREE.Vector3();
+            },
+
+            tick: function (time, timeDelta) {
+                if (!this.data.center) {
+                    console.warn('Center element not found for orbit component');
+                    return;
+                }
+
+                const radius = this.data.radius;
+                const period = this.data.period;
+                const angle = (time / 1000) * (2 * Math.PI) / period;
+
+                const centerPos = this.data.center.getAttribute('position');
+
+                const x = centerPos.x + radius * Math.cos(angle);
+                const y = centerPos.y;
+                const z = centerPos.z + radius * Math.sin(angle);
+
+                if (this.data.axis === 'y') {
+                    this.el.setAttribute('position', { x: x, y: y, z: z });
+                } else if (this.data.axis === 'x') {
+                    this.el.setAttribute('position', { x: x, y: y + radius * Math.sin(angle), z: z });
+                } else if (this.data.axis === 'z') {
+                    this.el.setAttribute('position', { x: x, y: y + radius * Math.sin(angle), z: z });
+                }
+
+                this.el.object3D.lookAt(centerPos);
+            }
+        });
+
+
+
+
+    </script>
+</head>
+
+<body>
+    <select id="planetSelector" style="position: absolute; top: 0; left: 0; z-index: 100;">
+        <option value="earthEntity">Earth</option>
+        <option value="sunEntity">Sun</option>
+        <option value="moonEntity">Moon</option>
+    </select>
+    <a-scene>
+        <a-assets>
+            <a-asset-item id="earth" src="/mrassets/earth.glb"></a-asset-item>
+            <a-asset-item id="moon" src="/mrassets/moon.glb"></a-asset-item>
+            <a-asset-item id="sun" src="/mrassets/sun/scene.gltf"></a-asset-item>
+        </a-assets>
+
+        <a-sky radius="60" material="side: back; src: /mrassets/sky.jpeg"></a-sky>
+        <a-entity camera position="0 1.6 0" look-controls zoom-on-scroll raycaster="objects: .clickable;"
+            follow-target="target: #earthEntity"></a-entity>
+
+        <a-entity id="sunEntity" gltf-model="#sun" position="0 0 0" scale="0.1 0.1 0.1"></a-entity>
+        <a-entity id="earthEntity" gltf-model="#earth" rotation="0 0 0" scale="0.005 0.005 0.005"
+            orbit="radius: 5; period: 10"></a-entity>
+
+        <a-entity id="moonEntity" gltf-model="#moon" rotation="0 0 0" scale="0.002 0.002 0.002"
+            eorbit="radius: 2; period: 4; axis: y; center: #earthEntity" position="-3 1 0"></a-entity>
+
+        <!-- follow-earth="radius: 5; period: 10; axis: y; target: #earthEntity" -->
+
+        <a-entity camera position="0 1.6 0" look-controls zoom-on-scroll raycaster="objects: .clickable;"
+            follow-target="radius: 10; period: 20; axis: y;"></a-entity>
+
+    </a-scene>
+    <script>
+        const planetSelector = document.querySelector('#planetSelector');
+        planetSelector.addEventListener('change', (event) => {
+            const selectedPlanetId = event.target.value;
+            const camera = document.querySelector('[camera]');
+            camera.setAttribute('follow-target', 'target', `#${selectedPlanetId}`);
+        });
+    </script>
+
+</body>
+
+</html>
